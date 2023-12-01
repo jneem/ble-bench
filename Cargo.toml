@@ -1,14 +1,20 @@
 [package]
-name = "esp32c3-template"
+name = "ble-bench"
 version = "0.1.0"
 authors = ["Joe Neeman <joeneeman@gmail.com>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
 
+[features]
+mtu128 = ["bleps/mtu128"]
+mtu256 = ["bleps/mtu256"]
+
 [dependencies]
-hal = { package = "esp32c3-hal", version = "0.9.0" }
-esp-backtrace = { version = "0.7.0", features = ["esp32c3", "panic-handler", "print-uart"] }
-esp-println = { version = "0.5.0", features = ["esp32c3"] }
+hal = { package = "esp32c3-hal", version = "0.13.0" }
+esp-backtrace = { version = "0.9.0", features = ["esp32c3", "panic-handler", "print-uart"] }
+esp-println = { version = "0.7.0", features = ["esp32c3"] }
+esp-wifi = { version = "0.1.1", features = ["ble", "esp32c3"], default-features = false }
+bleps = { git = "https://github.com/jneem/bleps", branch = "perf", features = ["macros"] }
 
 [profile.dev]
 opt-level = 2

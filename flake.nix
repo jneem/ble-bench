@@ -3,30 +3,37 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    rust-overlay.url = "github:oxalica/rust-overlay";
+    fenix.url = "github:nix-community/fenix";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, rust-overlay, flake-utils }:
+  outputs = { self, nixpkgs, fenix, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ (import rust-overlay) ];
+          overlays = [ fenix.overlays.default ];
         };
-        rust-toolchain = pkgs.rust-bin.nightly.latest.default.override {
-          extensions = [ "llvm-tools-preview" "rust-src" ];
-          targets = [ "riscv32imc-unknown-none-elf" ];
-        };
+        fx = fenix.packages.${system};
+        rust-toolchain = fx.combine [
+          fx.latest.cargo
+          fx.latest.rustc
+          fx.latest.rust-analyzer
+          fx.latest.clippy
+          fx.latest.rustfmt
+          fx.latest.rust-src
+        ];
+        python-toolchain = pkgs.python3.withPackages (ps: [ps.bleak]);
       in
       {
         devShell = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [
             rust-toolchain
-            rust-analyzer
+            python-toolchain
             cargo-espflash
             cargo-outdated
             taplo
+            wireshark
           ];
         };
       }
